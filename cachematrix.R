@@ -25,6 +25,56 @@ cachemean <- function(x, ...) {
         m
 }
 
+
+# Matrix inversion is usually a costly computation and there may be 
+# some benefit to caching the inverse of a matrix rather than compute 
+# it repeatedly (there are also alternatives to matrix inversion that 
+# we will not discuss here). Your assignment is to write a pair of 
+# functions that cache the inverse of a matrix.
+
+## This function creates a special "matrix" object that can cache its inverse.
+
+makeCacheMatrix <- function(x = matrix()) {
+	cachedInverse <- NULL
+	getSolved <- function() cachedInverse
+	getMatrix <- function() x
+	setSolved <- function(im) cachedInverse <<- im
+	setMatrix <- function(newMatrix) {
+		x <<- newMatrix
+		cachedInverse <<- NULL
+	}
+	list(getMatrix = getMatrix, getSolved = getSolved, 
+		 setSolved = setSolved, setMatrix = setMatrix)
+}
+
+
+## This function computes the inverse of the special "matrix" returned by 
+## makeCacheMatrix above. If the inverse has already been calculated 
+## (and the matrix has not changed), 
+## then the cachesolve should retrieve the inverse from the cache.
+
+cacheSolve <- function(x, ...) {
+	inverseMatrix <- x$getSolved()
+	if (!is.null(inverseMatrix)) {
+		## The inverse has already been cached
+		message("Using cached inverse.")
+		return(inverseMatrix)
+	}
+        ## Solve for a matrix that is the inverse of 'x', cache it, and return it
+	theMatrix <- x$getMatrix()
+	inverseMatrix <- solve(theMatrix, ...)
+	x$setSolved(inverseMatrix)
+	return(inverseMatrix)
+}
+
+## Function to test cacheSolve()
+## Adapted from http://stackoverflow.com/questions/19106015/r-how-to-generate-random-yet-easily-invertible-matrices
+generateRandomMatrix <- function(aSeed = 123,size = 3000) {
+	set.seed(aSeed)
+	return(matrix(runif(size^2),size))
+}
+
+
 ## My solution
 ## Caching the Inverse of a Matrix:
 ## Matrix inversion is usually a costly computation and there may be some 
@@ -66,4 +116,3 @@ cacheSolve <- function(x, ...) {
         x$setInverse(inv)
         inv
 }
-
